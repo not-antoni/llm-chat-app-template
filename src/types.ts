@@ -9,11 +9,6 @@ export interface Env {
 	AI: Ai;
 
 	/**
-	 * Binding for static assets.
-	 */
-	ASSETS: { fetch: (request: Request) => Promise<Response> };
-
-	/**
 	 * API Key for authentication (set as secret in Cloudflare Dashboard)
 	 */
 	API_KEY: string;
