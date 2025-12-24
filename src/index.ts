@@ -56,6 +56,16 @@ async function handleChatRequest(
 	request: Request,
 	env: Env,
 ): Promise<Response> {
+	// Validate API key
+	const authHeader = request.headers.get('Authorization');
+	const apiKey = authHeader?.replace('Bearer ', '');
+	if (!apiKey || apiKey !== env.API_KEY) {
+		return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+			status: 401,
+			headers: { 'content-type': 'application/json' },
+		});
+	}
+
 	try {
 		// Parse JSON request body
 		const { messages = [] } = (await request.json()) as {
