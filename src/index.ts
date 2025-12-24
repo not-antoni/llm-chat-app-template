@@ -20,6 +20,7 @@ const SYSTEM_PROMPT =
 export default {
 	/**
 	 * Main request handler for the Worker
+	 * All routes are protected - no public access
 	 */
 	async fetch(
 		request: Request,
@@ -28,9 +29,13 @@ export default {
 	): Promise<Response> {
 		const url = new URL(request.url);
 
-		// Handle static assets (frontend)
+		// SECURITY: Block ALL public access to frontend
+		// Only /api/chat is allowed (and it requires auth)
 		if (url.pathname === "/" || !url.pathname.startsWith("/api/")) {
-			return env.ASSETS.fetch(request);
+			return new Response(JSON.stringify({ error: "Access denied" }), {
+				status: 403,
+				headers: { "content-type": "application/json" },
+			});
 		}
 
 		// API Routes
