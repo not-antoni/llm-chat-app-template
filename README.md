@@ -1,153 +1,94 @@
-# LLM Chat Application Template
+# LLM Chat API (Cloudflare Workers AI)
 
-A simple, ready-to-deploy chat application template powered by Cloudflare Workers AI. This template provides a clean starting point for building AI chat applications with streaming responses.
+A secure, API-only LLM endpoint powered by Cloudflare Workers AI. 
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/llm-chat-app-template)
-
-<!-- dash-content-start -->
-
-## Demo
-
-This template demonstrates how to build an AI-powered chat interface using Cloudflare Workers AI with streaming responses. It features:
-
-- Real-time streaming of AI responses using Server-Sent Events (SSE)
-- Easy customization of models and system prompts
-- Support for AI Gateway integration
-- Clean, responsive UI that works on mobile and desktop
+> **Note:** This is an API-only deployment. No public web interface - all endpoints require authentication.
 
 ## Features
 
-- 💬 Simple and responsive chat interface
-- ⚡ Server-Sent Events (SSE) for streaming responses
-- 🧠 Powered by Cloudflare Workers AI LLMs
-- 🛠️ Built with TypeScript and Cloudflare Workers
-- 📱 Mobile-friendly design
-- 🔄 Maintains chat history on the client
-- 🔎 Built-in Observability logging
-<!-- dash-content-end -->
+- 🔐 **API Key Authentication** - All requests require Bearer token
+- ⚡ **Server-Sent Events (SSE)** - Real-time streaming responses
+- 🧠 **Llama 3.1 8B** - Fast, high-quality responses via Cloudflare edge
+- 🌍 **Global Edge Network** - Low latency worldwide
 
-## Getting Started
+## API Usage
+
+### Endpoint
+
+```
+POST /api/chat
+```
+
+### Headers
+
+```
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+```
+
+### Request Body
+
+```json
+{
+  "messages": [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Hello!"}
+  ]
+}
+```
+
+### Response
+
+Server-Sent Events stream:
+
+```
+data: {"response":"Hello"}
+data: {"response":"!"}
+data: {"response":" How"}
+data: {"response":" can I help?"}
+data: [DONE]
+```
+
+## Deployment
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or newer)
+- Node.js v18+
+- Cloudflare account with Workers AI access
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
-- A Cloudflare account with Workers AI access
 
-### Installation
+### Setup
 
-1. Clone this repository:
-
+1. Clone and install:
    ```bash
-   git clone https://github.com/cloudflare/templates.git
-   cd templates/llm-chat-app
-   ```
-
-2. Install dependencies:
-
-   ```bash
+   git clone https://github.com/not-antoni/llm-chat-app-template.git
+   cd llm-chat-app-template
    npm install
    ```
 
-3. Generate Worker type definitions:
+2. Deploy:
    ```bash
-   npm run cf-typegen
+   npx wrangler deploy
    ```
 
-### Development
+3. Set your API key secret:
+   ```bash
+   npx wrangler secret put API_KEY
+   # Enter your secret API key when prompted
+   ```
 
-Start a local development server:
+## Security
 
-```bash
-npm run dev
-```
+- **No public access** - Root URL returns `403 Access denied`
+- **API key required** - Invalid/missing key returns `401 Unauthorized`
+- **Secrets stored in Cloudflare** - Not in the repository
 
-This will start a local server at http://localhost:8787.
+## Rate Limits
 
-Note: Using Workers AI accesses your Cloudflare account even during local development, which will incur usage charges.
-
-### Deployment
-
-Deploy to Cloudflare Workers:
-
-```bash
-npm run deploy
-```
-
-### Monitor
-
-View real-time logs associated with any deployed Worker:
-
-```bash
-npm wrangler tail
-```
-
-## Project Structure
-
-```
-/
-├── public/             # Static assets
-│   ├── index.html      # Chat UI HTML
-│   └── chat.js         # Chat UI frontend script
-├── src/
-│   ├── index.ts        # Main Worker entry point
-│   └── types.ts        # TypeScript type definitions
-├── test/               # Test files
-├── wrangler.jsonc      # Cloudflare Worker configuration
-├── tsconfig.json       # TypeScript configuration
-└── README.md           # This documentation
-```
-
-## How It Works
-
-### Backend
-
-The backend is built with Cloudflare Workers and uses the Workers AI platform to generate responses. The main components are:
-
-1. **API Endpoint** (`/api/chat`): Accepts POST requests with chat messages and streams responses
-2. **Streaming**: Uses Server-Sent Events (SSE) for real-time streaming of AI responses
-3. **Workers AI Binding**: Connects to Cloudflare's AI service via the Workers AI binding
-
-### Frontend
-
-The frontend is a simple HTML/CSS/JavaScript application that:
-
-1. Presents a chat interface
-2. Sends user messages to the API
-3. Processes streaming responses in real-time
-4. Maintains chat history on the client side
-
-## Customization
-
-### Changing the Model
-
-To use a different AI model, update the `MODEL_ID` constant in `src/index.ts`. You can find available models in the [Cloudflare Workers AI documentation](https://developers.cloudflare.com/workers-ai/models/).
-
-### Using AI Gateway
-
-The template includes commented code for AI Gateway integration, which provides additional capabilities like rate limiting, caching, and analytics.
-
-To enable AI Gateway:
-
-1. [Create an AI Gateway](https://dash.cloudflare.com/?to=/:account/ai/ai-gateway) in your Cloudflare dashboard
-2. Uncomment the gateway configuration in `src/index.ts`
-3. Replace `YOUR_GATEWAY_ID` with your actual AI Gateway ID
-4. Configure other gateway options as needed:
-   - `skipCache`: Set to `true` to bypass gateway caching
-   - `cacheTtl`: Set the cache time-to-live in seconds
-
-Learn more about [AI Gateway](https://developers.cloudflare.com/ai-gateway/).
-
-### Modifying the System Prompt
-
-The default system prompt can be changed by updating the `SYSTEM_PROMPT` constant in `src/index.ts`.
-
-### Styling
-
-The UI styling is contained in the `<style>` section of `public/index.html`. You can modify the CSS variables at the top to quickly change the color scheme.
+- Free tier: 10,000 tokens/day
+- Rate limit: 300 requests/minute
 
 ## Resources
 
-- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
-- [Cloudflare Workers AI Documentation](https://developers.cloudflare.com/workers-ai/)
-- [Workers AI Models](https://developers.cloudflare.com/workers-ai/models/)
+- [Cloudflare Workers AI Docs](https://developers.cloudflare.com/workers-ai/)
+- [Available Models](https://developers.cloudflare.com/workers-ai/models/)
